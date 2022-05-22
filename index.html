@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book App</title>
+
+  <link rel="stylesheet" href="./index.css">
+  <script src="./app.js"></script>
+</head>
+
+<body>
+  <div class="header">
+    <div class="logo"></div>
+    <div class="actions">
+      <button class="button" onclick="createBookModalRender()" style="margin:0">add</button>
+    </div>
+  </div>
+  <div class="cards" id="books">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="modal-wrapper" id="edit-book"></div>
+  <div class="modal-wrapper" id="create-book">
+    <div class="modal">
+      <div class="modal-header">
+        Delete Book
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this book?
+      </div>
+      <div class="modal-footer">
+        <button class="button">
+
+        </button>
+      </div>
+    </div>
+    <div class="modal-background"></div>
+  </div>
+</body>
+
+</html>
