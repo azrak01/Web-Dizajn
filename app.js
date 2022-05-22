@@ -66,8 +66,14 @@ const BOOKS = {
   },
   addBook: (book) => {
     let card = new Card(book)
-    BOOKS.data.push(card);
-    BOOKS.root.appendChild(stringToNode(card.render(true,0)));
+
+    let exists = BOOKS.data.find(bk => bk.id == book?.id);
+    if(exists) BOOKS.data.map(bk => {
+      if(bk.id == book?.id) return book;
+      return bk;
+    })
+    else BOOKS.data.push(card);
+    BOOKS.root.appendChild(stringToNode(card.render(true, 0)));
     card.initEvents();
   }
 }
@@ -94,7 +100,7 @@ class Card {
       }
       else {
         BOOKS?.data?.filter(bk => bk?.id != this.id)?.forEach(bk => {
-          if(bk.root){
+          if (bk.root) {
             if (bk.root.classList.contains('selected')) {
               bk.root.classList.remove('selected');
               bk.root.classList.add('collapsing');
@@ -245,47 +251,49 @@ const createBookModalRender = async () => {
   root.querySelector('#button-modal-cancel').addEventListener('click', () => { root.remove() });
   root.querySelector('#button-modal-create').addEventListener('click', async () => {
     let data = {};
+
     let inputFields = root.querySelectorAll('.input-field');
 
     let valid = true;
-    for(let i=0;i<inputFields.length;i++){
+    for (let i = 0; i < inputFields.length; i++) {
       let inputField = inputFields[i];
 
       let value = inputField.querySelector('input').value;
       let key = inputField.querySelector('input').getAttribute('name');
 
-      if(!value || value.length == ''){
+      if (!value || value.length == '') {
         inputField.querySelector('.error-message').innerText = 'This field is required!';
         valid = false;
       }
 
       data[key] = value;
     }
-    if(!valid) return;
+    if (!valid) return;
 
     let authors = await AuthorApis.list();
 
     let author = await authors.find(ath => ath.name == data.author);
-    if(!author){
-      await AuthorApis.create({name: data.author?.name});
+    if (!author) {
+      await AuthorApis.create({ name: data.author });
       authors = await AuthorApis.list();
       author = authors.find(ath => ath.name == data.author);
     }
     delete data.author;
-    data.authorId = author?.id;
+    data['authorId'] = author?.id;
+
 
     await BookApis.create(data);
     let bookList = await BookApis.list();
-    for(let i=0;i<bookList.length;i++){
+    for (let i = 0; i < bookList.length; i++) {
       let exists = false;
-      for(let q=0;q<BOOKS.data.length;q++){
-        if(bookList[i]?.id == BOOKS.data[q]?.id){
+      for (let q = 0; q < BOOKS.data.length; q++) {
+        if (bookList[i]?.id == BOOKS.data[q]?.id) {
           exists = true;
           break;
         }
       }
 
-      if(exists) continue;
+      if (exists) continue;
 
       BOOKS.addBook(bookList[i]);
       root.remove();
@@ -353,26 +361,26 @@ const editBookModalRender = async (book) => {
     let inputFields = root.querySelectorAll('.input-field');
 
     let valid = true;
-    for(let i=0;i<inputFields.length;i++){
+    for (let i = 0; i < inputFields.length; i++) {
       let inputField = inputFields[i];
 
       let value = inputField.querySelector('input').value;
       let key = inputField.querySelector('input').getAttribute('name');
 
-      if(!value || value.length == ''){
+      if (!value || value.length == '') {
         inputField.querySelector('.error-message').innerText = 'This field is required!';
         valid = false;
       }
 
       data[key] = value;
     }
-    if(!valid) return;
+    if (!valid) return;
 
     let authors = await AuthorApis.list();
 
     let author = await authors.find(ath => ath.name == data.author);
-    if(!author){
-      await AuthorApis.create({name: data.author?.name});
+    if (!author) {
+      await AuthorApis.create({ name: data.author });
       authors = await AuthorApis.list();
       author = authors.find(ath => ath.name == data.author);
     }
@@ -380,23 +388,22 @@ const editBookModalRender = async (book) => {
     data.authorId = author?.id;
 
     await BookApis.update(data);
-    let bookList = await BookApis.list();
-    for(let i=0;i<bookList.length;i++){
-      let exists = false;
-      for(let q=0;q<BOOKS.data.length;q++){
-        if(bookList[i]?.id == BOOKS.data[q]?.id){
-          exists = true;
-          break;
-        }
-      }
+    await book.remove();
 
-      if(!exists) continue;
-      
-      BOOKS?.data?.find(bk => bk?.id == data?.bookId).remove();
-      BOOKS.addBook(bookList[i]);
-      root.remove();
-      return;
-    }
+    BOOKS.addBook({
+      ...{
+        id: book?.id,
+        author: author,
+        image: book?.image, 
+        name: book?.name,
+        genre: book?.genre
+      },
+      id: data?.bookId,
+      image: data?.image,
+      name: data?.name,
+      genre: data?.genre
+    });
+    root.remove();
   });
 }
 
